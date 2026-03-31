@@ -158,7 +158,7 @@ const AGENTS={
   sophie:  {name:"Dr. Sophie Vermeer", role:"Wetenschapper",   color:"#5B6ABF",initials:"SV",gradient:"linear-gradient(135deg,#5B6ABF,#7B8AD4)",icon:"🔬"},
   daan:    {name:"Daan de Groot",       role:"Data Verzamelaar",color:"#2EAA6F",initials:"DG",gradient:"linear-gradient(135deg,#2EAA6F,#4DC98A)",icon:"📊"},
   marielle:{name:"Mariëlle Bakker",     role:"HR Adviseur",     color:"#D4566A",initials:"MB",gradient:"linear-gradient(135deg,#D4566A,#E87A8D)",icon:"💼"},
-  ali:    {name:"Mr. Ali Mhmid",     role:"Jurist",          color:"#3A3A5C",initials:"AM",gradient:"linear-gradient(135deg,#3A3A5C,#5A5A7C)",icon:"⚖️"},
+  henk:    {name:"Mr. Henk Jansen",     role:"Jurist",          color:"#3A3A5C",initials:"HJ",gradient:"linear-gradient(135deg,#3A3A5C,#5A5A7C)",icon:"⚖️"},
   lisa:    {name:"Lisa van Dijk",        role:"Tekstschrijver",  color:"#B35CC9",initials:"LD",gradient:"linear-gradient(135deg,#B35CC9,#D07CE0)",icon:"✍️"},
 };
 const AK=Object.keys(AGENTS);
@@ -251,7 +251,7 @@ async function sendMessage(){
     if(!res.ok)throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     const ct=res.headers.get("content-type")||"";
     if(ct.includes("text/event-stream")||ct.includes("text/plain")){await handleStream(res)}
-    else{const d=await res.json();const out=d.output||d.response||d.text||(Array.isArray(d)?d[0]?.output||d[0]?.response||JSON.stringify(d):JSON.stringify(d));processOutput(out)}
+    else{const d=await res.json();const out=d.output||d.response||d.text||(Array.isArray(d)?d[0]?.output||d[0]?.response||JSON.stringify(d):JSON.stringify(d));await processOutput(out)}
   }catch(err){removeTyping();addSystem(`Verbindingsfout: ${err.message}`);console.error(err)}
   sending=false;document.getElementById("send-btn").disabled=false;document.getElementById("chat-input").focus();
 }
@@ -263,14 +263,12 @@ async function handleStream(res){
 }
 
 // ═══ OUTPUT PROCESSING — tries JSON first, falls back to text parsing ═══
-function processOutput(raw){
-  // Try to parse as JSON array (structured format)
+async function processOutput(raw){
   const jsonMessages = tryParseJSON(raw);
   if(jsonMessages){
-    displayJSONMessages(jsonMessages);
+    await displayJSONMessages(jsonMessages);
     return;
   }
-  // Fallback: parse as plain text
   displayTextFallback(raw);
 }
 
@@ -300,30 +298,38 @@ function tryParseJSON(raw){
   return null;
 }
 
-function displayJSONMessages(messages){
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+
+async function displayJSONMessages(messages){
   let prevAgent = null;
-  for(const msg of messages){
+
+  for(let i=0; i<messages.length; i++){
+    const msg = messages[i];
     const agentKey = msg.agent && AGENTS[msg.agent] ? msg.agent : "wendai";
     const toAgent = msg.to && AGENTS[msg.to] ? msg.to : null;
     const text = msg.text || "";
     if(!text.trim()) continue;
 
-    // Show handoff line when agent changes
+    // Typing delay scales with text length — feels natural
+    const typingDelay = Math.min(800 + text.length * 3, 3000);
+
+    // Show handoff when agent changes
     if(prevAgent && agentKey !== prevAgent){
       addHandoff(prevAgent, agentKey);
+      await wait(300);
     }
 
-    // Flash status for active agents
-    if(agentKey !== "wendai" && agentKey !== prevAgent){
-      setSt(agentKey, "away");
-      setTimeout(((k)=>()=>{if(connected)setSt(k,"online")})(agentKey), 2000);
+    // Show typing indicator before this message (skip for the first)
+    if(i > 0){
+      showTyping(agentKey);
+      await wait(typingDelay);
+      removeTyping();
     }
 
+    // Render the actual message
     if(toAgent){
-      // Message directed at another agent — show as directed message with thread indicator
       addDirectedMsg(agentKey, toAgent, text);
     } else if(agentKey === "wendai"){
-      // WendAI speaking — check for @mentions in text
       const mentioned = detectMention(text);
       if(mentioned){
         addMention("wendai", mentioned, text);
@@ -331,10 +337,11 @@ function displayJSONMessages(messages){
         addMsg("wendai", text);
       }
     } else {
-      // Sub-agent responding (no "to" = speaking to the room)
       addAgentReply(agentKey, text);
     }
 
+    // Pause so user can read before next message
+    await wait(500);
     prevAgent = agentKey;
   }
 }
