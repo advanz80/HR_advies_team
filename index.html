@@ -304,23 +304,26 @@ function displayJSONMessages(messages){
   let prevAgent = null;
   for(const msg of messages){
     const agentKey = msg.agent && AGENTS[msg.agent] ? msg.agent : "wendai";
+    const toAgent = msg.to && AGENTS[msg.to] ? msg.to : null;
     const text = msg.text || "";
     if(!text.trim()) continue;
 
-    // Show handoff when agent changes
+    // Show handoff line when agent changes
     if(prevAgent && agentKey !== prevAgent){
       addHandoff(prevAgent, agentKey);
     }
 
-    // Show typing briefly for non-wendai agents
+    // Flash status for active agents
     if(agentKey !== "wendai" && agentKey !== prevAgent){
       setSt(agentKey, "away");
-      setTimeout(()=>{if(connected)setSt(agentKey,"online")}, 2000);
+      setTimeout(((k)=>()=>{if(connected)setSt(k,"online")})(agentKey), 2000);
     }
 
-    // Render the message
-    if(agentKey === "wendai"){
-      // Check if it's an announcement mentioning another agent
+    if(toAgent){
+      // Message directed at another agent — show as directed message with thread indicator
+      addDirectedMsg(agentKey, toAgent, text);
+    } else if(agentKey === "wendai"){
+      // WendAI speaking — check for @mentions in text
       const mentioned = detectMention(text);
       if(mentioned){
         addMention("wendai", mentioned, text);
@@ -328,8 +331,8 @@ function displayJSONMessages(messages){
         addMsg("wendai", text);
       }
     } else {
-      // Sub-agent — show as card
-      addCard(agentKey, text);
+      // Sub-agent responding (no "to" = speaking to the room)
+      addAgentReply(agentKey, text);
     }
 
     prevAgent = agentKey;
@@ -413,6 +416,23 @@ function addMention(from,to,text){
     `<span style="background:${t.color}18;color:${t.color};font-weight:600;padding:1px 4px;border-radius:4px">$1</span>`);
   document.getElementById("messages-area").insertAdjacentHTML("beforeend",
     `<div class="msg-row msg-appear">${avHTML(from)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:${f.color}">${f.name}</span><span style="font-size:11px;color:#8B8FA3;font-weight:500">${f.role}</span><span class="msg-time">${timeNow()}</span></div><div class="msg-text">${fmt(hl)}</div></div></div>`);scroll();
+}
+
+function addDirectedMsg(from,to,text){
+  const f=AGENTS[from],t=AGENTS[to];
+  const hl=esc(text).replace(new RegExp(`(@${escRe(t.name).split(' ')[0]}|@${escRe(t.name)}|@Klant)`,"gi"),
+    (match)=>{
+      if(match==="@Klant"||match==="@klant") return `<span style="background:#47556918;color:#475569;font-weight:600;padding:1px 4px;border-radius:4px">${match}</span>`;
+      return `<span style="background:${t.color}18;color:${t.color};font-weight:600;padding:1px 4px;border-radius:4px">${match}</span>`;
+    });
+  document.getElementById("messages-area").insertAdjacentHTML("beforeend",
+    `<div class="msg-row msg-appear">${avHTML(from)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span class="msg-name" style="color:${f.color}">${f.name}</span><span style="font-size:11px;color:#8B8FA3">→</span><span style="font-size:12px;font-weight:600;color:${t.color}">${t.name}</span><span class="msg-time">${timeNow()}</span></div><div class="msg-text" style="border-left:3px solid ${t.color}30;padding-left:10px;margin-top:4px">${fmt(hl)}</div></div></div>`);scroll();
+}
+
+function addAgentReply(k,text){
+  const a=AGENTS[k];
+  document.getElementById("messages-area").insertAdjacentHTML("beforeend",
+    `<div class="msg-row msg-appear">${avHTML(k)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:${a.color}">${a.name}</span><span style="font-size:11px;color:#8B8FA3;font-weight:500">${a.role}</span><span class="msg-time">${timeNow()}</span></div><div class="card"><div class="card-header" style="background:${a.gradient}">${a.icon} ${a.name} — ${a.role}</div><div class="card-body">${fmt(esc(text))}</div></div></div></div>`);scroll();
 }
 
 function addHandoff(from,to){
