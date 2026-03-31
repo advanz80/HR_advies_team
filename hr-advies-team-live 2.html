@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Advies Team — Driessen Groep</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body { font-family: 'DM Sans', 'Segoe UI', sans-serif; background: #1A1D21; }
+
+  @keyframes typingPulse {
+    0%, 80%, 100% { opacity: 0.3; }
+    40% { opacity: 1; }
+  }
+  @keyframes msgAppear {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .typing-dot { animation: typingPulse 1.2s ease-in-out infinite; font-size: 10px; color: #8B8FA3; }
+  .msg-appear { animation: msgAppear 0.3s ease-out; }
+  .slide-in { animation: slideIn 0.25s ease-out; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #D1D2D3; border-radius: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  .app { display: flex; width: 100%; height: 100vh; }
+
+  /* ── Sidebar ────────────────────────────── */
+  .sidebar {
+    width: 260px; min-width: 260px; background: #1A1D21;
+    border-right: 1px solid #35373B;
+    display: flex; flex-direction: column; overflow-y: auto;
+  }
+  .ws-header {
+    padding: 14px 16px; border-bottom: 1px solid #35373B;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ws-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: linear-gradient(135deg, #C9A063, #E8C97A);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px; color: #fff;
+  }
+  .ws-name { font-weight: 700; font-size: 15px; color: #fff; }
+  .ws-sub { font-size: 11px; color: #8B8FA3; }
+  .section-label {
+    font-size: 12px; font-weight: 700; color: #8B8FA3;
+    letter-spacing: 0.04em; padding: 0 4px 6px;
+  }
+  .channel-active {
+    padding: 5px 10px; border-radius: 6px; background: #1164A3;
+    color: #fff; font-weight: 600; font-size: 14px;
+  }
+  .channel-inactive { padding: 5px 10px; color: #8B8FA3; font-size: 14px; margin-top: 2px; }
+  .team-member {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 10px; font-size: 14px; color: #D1D2D3;
+    border-radius: 6px; cursor: pointer; transition: background 0.15s;
+  }
+  .team-member:hover { background: #2C2D31; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .status-online { background: #44b700; }
+  .status-away { background: #f5a623; }
+  .status-offline { background: #666; }
+  .member-avatar-tiny { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
+  .member-avatar-fallback {
+    width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 8px;
+  }
+
+  /* ── Config ─────────────────────────────── */
+  .config-section { padding: 10px 16px; border-top: 1px solid #35373B; }
+  .config-label { font-size: 11px; color: #8B8FA3; margin-bottom: 4px; font-weight: 700; letter-spacing: 0.03em; }
+  .config-input {
+    width: 100%; padding: 7px 10px; border-radius: 6px;
+    border: 1px solid #35373B; background: #2C2D31; color: #D1D2D3;
+    font-size: 12px; font-family: 'Consolas', 'Monaco', monospace;
+    outline: none; margin-bottom: 6px;
+  }
+  .config-input:focus { border-color: #C9A063; }
+  .config-hint { font-size: 10px; color: #5A5A6A; line-height: 1.4; margin-bottom: 8px; }
+  .connect-btn {
+    padding: 9px 0; border-radius: 8px; border: none;
+    font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;
+    transition: all 0.2s;
+  }
+  .btn-ready { background: linear-gradient(135deg, #C9A063, #E8C97A); color: #1A1D21; }
+  .btn-ready:hover { filter: brightness(1.05); }
+  .btn-connected { background: #2EAA6F; color: #fff; }
+  .btn-small {
+    padding: 6px 10px; border-radius: 5px; border: 1px solid #35373B;
+    background: #2C2D31; color: #8B8FA3; font-size: 11px;
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
+  }
+  .btn-small:hover { border-color: #C9A063; color: #C9A063; }
+  .saved-indicator { font-size: 10px; color: #2EAA6F; font-weight: 600; display: none; }
+  .saved-indicator.show { display: inline; }
+
+  /* ── Avatar config overlay ──────────────── */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
+  .overlay.open { display: flex; }
+  .panel {
+    background: #1A1D21; border: 1px solid #35373B; border-radius: 12px;
+    padding: 24px; width: 500px; max-width: 90vw; max-height: 85vh;
+    overflow-y: auto; animation: slideIn 0.25s ease-out;
+  }
+  .panel-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .panel-sub { font-size: 12px; color: #8B8FA3; margin-bottom: 20px; line-height: 1.5; }
+  .avatar-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+    padding: 10px; background: #2C2D31; border-radius: 8px;
+  }
+  .avatar-preview { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+  .avatar-preview-fb {
+    width: 48px; height: 48px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 16px;
+  }
+  .avatar-input-group { flex: 1; min-width: 0; }
+  .avatar-agent-name { font-size: 13px; font-weight: 700; color: #D1D2D3; margin-bottom: 2px; }
+  .avatar-agent-role { font-size: 11px; color: #8B8FA3; margin-bottom: 6px; }
+  .avatar-url-input {
+    width: 100%; padding: 6px 8px; border-radius: 5px;
+    border: 1px solid #35373B; background: #1A1D21; color: #D1D2D3;
+    font-size: 11px; font-family: 'Consolas', monospace; outline: none;
+  }
+  .avatar-url-input:focus { border-color: #C9A063; }
+  .panel-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .btn-cancel {
+    padding: 8px 20px; border-radius: 6px; border: 1px solid #35373B;
+    background: transparent; color: #8B8FA3; font-weight: 600; font-size: 13px;
+    cursor: pointer; font-family: inherit;
+  }
+  .btn-save {
+    padding: 8px 20px; border-radius: 6px; border: none;
+    background: linear-gradient(135deg, #C9A063, #E8C97A); color: #1A1D21;
+    font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+
+  /* ── Main chat ──────────────────────────── */
+  .main-chat { flex: 1; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
+  .chat-header {
+    padding: 10px 20px; border-bottom: 1px solid #E8E8E8;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .chat-title { font-weight: 700; font-size: 16px; color: #1D1E25; }
+  .chat-subtitle { font-size: 12px; color: #8B8FA3; margin-top: 2px; }
+  .header-avatars { display: flex; gap: 4px; }
+  .messages-area { flex: 1; overflow-y: auto; padding: 16px 0; }
+  .input-area { padding: 10px 20px 14px; border-top: 1px solid #E8E8E8; }
+  .input-row { display: flex; gap: 8px; align-items: flex-end; }
+  .chat-input {
+    flex: 1; padding: 10px 14px; border: 1px solid #D1D2D3; border-radius: 8px;
+    font-size: 14px; font-family: inherit; background: #FAFAFA;
+    outline: none; resize: none; min-height: 42px; max-height: 120px; line-height: 1.4;
+  }
+  .chat-input:focus { border-color: #C9A063; background: #fff; }
+  .chat-input:disabled { background: #F0F0F0; color: #999; }
+  .send-btn {
+    padding: 10px 18px; border: none; border-radius: 8px;
+    background: linear-gradient(135deg, #C9A063, #E8C97A);
+    color: #1A1D21; font-weight: 700; font-size: 14px;
+    cursor: pointer; font-family: inherit; white-space: nowrap; transition: all 0.15s;
+  }
+  .send-btn:hover { filter: brightness(1.05); }
+  .send-btn:disabled { background: #E8E8E8; color: #999; cursor: not-allowed; filter: none; }
+
+  /* ── Messages ───────────────────────────── */
+  .msg-row { display: flex; gap: 10px; padding: 6px 20px; align-items: flex-start; }
+  .avatar-chat-img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; }
+  .avatar-chat-fb {
+    width: 36px; height: 36px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 13px;
+  }
+  .msg-name { font-weight: 700; font-size: 14px; }
+  .msg-time { font-size: 11px; color: #8B8FA3; }
+  .msg-text { font-size: 14px; line-height: 1.6; color: #1D1E25; margin-top: 3px; white-space: pre-wrap; }
+
+  /* ── Cards ───────────────────────────────── */
+  .card { margin-top: 8px; border: 1px solid #E0E3EB; border-radius: 8px; overflow: hidden; background: #fff; }
+  .card-header {
+    padding: 10px 14px; color: #fff; font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-header-avatar { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
+  .card-body { padding: 14px; font-size: 13px; line-height: 1.6; color: #3A3A5C; white-space: pre-wrap; }
+
+  /* ── Internal msg (agent-to-agent) ──────── */
+  .internal-msg {
+    margin-top: 6px; padding: 8px 12px;
+    background: #F8F9FB; border-left: 3px solid #D1D2D3;
+    border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.5; color: #5A5A6A;
+  }
+  .internal-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: #8B8FA3; margin-bottom: 3px;
+  }
+
+  .conn-badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .conn-off { background: #FFF3E0; color: #E65100; }
+  .conn-on { background: #E8F5E9; color: #2E7D32; }
+
+  .welcome {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; height: 100%; gap: 12px; color: #8B8FA3;
+  }
+
+  @media (max-width: 700px) { .sidebar { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="ws-header">
+      <div class="ws-icon">D</div>
+      <div><div class="ws-name">Driessen Groep</div><div class="ws-sub">HR Advies Team</div></div>
+    </div>
+    <div style="padding:12px 12px 6px">
+      <div class="section-label">Kanalen</div>
+      <div class="channel-active"># hr-advies</div>
+      <div class="channel-inactive"># algemeen</div>
+    </div>
+    <div style="padding:12px 12px 6px" id="team-list"></div>
+    <div class="config-section" style="margin-top:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div class="config-label" style="margin:0">n8n Webhook URL</div>
+        <span class="saved-indicator" id="url-saved">✓ opgeslagen</span>
+      </div>
+      <input type="text" class="config-input" id="webhook-url" placeholder="https://jouw-n8n.app/webhook/xxx/chat" oninput="saveWebhookUrl()">
+      <div class="config-hint">Chat Trigger → Production URL + <code>/chat</code></div>
+      <div style="display:flex;gap:6px">
+        <button class="connect-btn btn-ready" id="connect-btn" onclick="toggleConnection()" style="flex:1">Verbinden</button>
+        <button class="btn-small" onclick="openAvatarConfig()">📷 Foto's</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-chat">
+    <div class="chat-header">
+      <div>
+        <div class="chat-title"># hr-advies</div>
+        <div class="chat-subtitle"><span id="conn-status" class="conn-badge conn-off">● Niet verbonden</span></div>
+      </div>
+      <div class="header-avatars" id="header-avatars"></div>
+    </div>
+    <div class="messages-area" id="messages-area">
+      <div class="welcome" id="welcome">
+        <div style="font-size:48px">👋</div>
+        <div style="font-size:20px;font-weight:700;color:#1D1E25">HR Advies Team</div>
+        <div style="font-size:14px;text-align:center;max-width:440px;line-height:1.6">
+          Vul links je n8n webhook URL in en klik <strong>Verbinden</strong>.<br>Daarna kun je hier live chatten met het team.
+        </div>
+      </div>
+    </div>
+    <div class="input-area">
+      <div class="input-row">
+        <textarea class="chat-input" id="chat-input" placeholder="Verbind eerst met n8n..." rows="1" disabled onkeydown="handleKey(event)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()" disabled>Verstuur</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Avatar Config Overlay -->
+<div class="overlay" id="avatar-overlay" onclick="if(event.target===this)closeAvatarConfig()">
+  <div class="panel" onclick="event.stopPropagation()">
+    <div class="panel-title">📷 Teamfoto's instellen</div>
+    <div class="panel-sub">Geef elke agent een gezicht. Plak een afbeeldings-URL (bijv. via Midjourney, DALL-E of Flux). Wordt lokaal in je browser opgeslagen.</div>
+    <div id="avatar-rows"></div>
+    <div class="panel-btns">
+      <button class="btn-cancel" onclick="closeAvatarConfig()">Annuleren</button>
+      <button class="btn-save" onclick="saveAvatarConfig()">💾 Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+const AGENTS = {
+  wendai:   { name:"WendAI",             role:"Regisseur & Klantcontact", color:"#C9A063", initials:"WA", gradient:"linear-gradient(135deg,#C9A063,#E8C97A)", icon:"🎯" },
+  sophie:   { name:"Dr. Sophie Vermeer", role:"Wetenschapper",            color:"#5B6ABF", initials:"SV", gradient:"linear-gradient(135deg,#5B6ABF,#7B8AD4)", icon:"🔬" },
+  daan:     { name:"Daan de Groot",       role:"Data Verzamelaar",         color:"#2EAA6F", initials:"DG", gradient:"linear-gradient(135deg,#2EAA6F,#4DC98A)", icon:"📊" },
+  marielle: { name:"Mariëlle Bakker",     role:"HR Adviseur",              color:"#D4566A", initials:"MB", gradient:"linear-gradient(135deg,#D4566A,#E87A8D)", icon:"💼" },
+  henk:     { name:"Mr. Henk Jansen",     role:"Jurist",                   color:"#3A3A5C", initials:"HJ", gradient:"linear-gradient(135deg,#3A3A5C,#5A5A7C)", icon:"⚖️" },
+  lisa:     { name:"Lisa van Dijk",        role:"Tekstschrijver",           color:"#B35CC9", initials:"LD", gradient:"linear-gradient(135deg,#B35CC9,#D07CE0)", icon:"✍️" },
+};
+const AK = Object.keys(AGENTS);
+let avatarPhotos = {};
+let connected = false, sessionId = null, sending = false;
+
+// ── Persistence ──────────────────────────────────────────────
+function loadSettings() {
+  try {
+    const u = localStorage.getItem("hrt_webhook_url");
+    if (u) document.getElementById("webhook-url").value = u;
+    const p = localStorage.getItem("hrt_avatar_photos");
+    if (p) avatarPhotos = JSON.parse(p);
+  } catch(e) {}
+}
+
+function saveWebhookUrl() {
+  localStorage.setItem("hrt_webhook_url", document.getElementById("webhook-url").value.trim());
+  const ind = document.getElementById("url-saved");
+  ind.classList.add("show");
+  setTimeout(() => ind.classList.remove("show"), 2000);
+}
+
+// ── Avatar HTML helpers ──────────────────────────────────────
+function chatAvatar(k) {
+  const a = AGENTS[k], p = avatarPhotos[k];
+  if (p) return `<img class="avatar-chat-img" src="${esc(p)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="avatar-chat-fb" style="background:${a.gradient};display:none">${a.initials}</div>`;
+  return `<div class="avatar-chat-fb" style="background:${a.gradient}">${a.initials}</div>`;
+}
+
+function headerAvatar(k, s) {
+  const a = AGENTS[k], p = avatarPhotos[k];
+  if (p) return `<img src="${esc(p)}" style="width:${s}px;height:${s}px;border-radius:6px;object-fit:cover" onerror="this.style.display='none'">`;
+  return `<div style="width:${s}px;height:${s}px;min-width:${s}px;border-radius:6px;background:${a.gradient};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${s*0.36}px">${a.initials}</div>`;
+}
+
+function sidebarAvatar(k) {
+  const a = AGENTS[k], p = avatarPhotos[k];
+  if (p) return `<img class="member-avatar-tiny" src="${esc(p)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="member-avatar-fallback" style="background:${a.gradient};display:none">${a.initials}</div>`;
+  return `<div class="member-avatar-fallback" style="background:${a.gradient}">${a.initials}</div>`;
+}
+
+function cardAvatar(k) {
+  const p = avatarPhotos[k];
+  return p ? `<img class="card-header-avatar" src="${esc(p)}" onerror="this.style.display='none'">` : "";
+}
+
+// ── Avatar config panel ──────────────────────────────────────
+function openAvatarConfig() {
+  document.getElementById("avatar-rows").innerHTML = AK.map(k => {
+    const a = AGENTS[k], p = avatarPhotos[k] || "";
+    return `<div class="avatar-row">
+      ${p ? `<img class="avatar-preview" id="ap-${k}" src="${esc(p)}">` : `<div class="avatar-preview-fb" id="ap-${k}" style="background:${a.gradient}">${a.initials}</div>`}
+      <div class="avatar-input-group">
+        <div class="avatar-agent-name" style="color:${a.color}">${a.name}</div>
+        <div class="avatar-agent-role">${a.role}</div>
+        <input type="text" class="avatar-url-input" id="ai-${k}" value="${esc(p)}" placeholder="https://voorbeeld.nl/foto.jpg">
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("avatar-overlay").classList.add("open");
+}
+
+function closeAvatarConfig() { document.getElementById("avatar-overlay").classList.remove("open"); }
+
+function saveAvatarConfig() {
+  AK.forEach(k => {
+    const v = document.getElementById(`ai-${k}`).value.trim();
+    if (v) avatarPhotos[k] = v; else delete avatarPhotos[k];
+  });
+  localStorage.setItem("hrt_avatar_photos", JSON.stringify(avatarPhotos));
+  renderSidebar(); renderHeader();
+  closeAvatarConfig();
+}
+
+// ── Render sidebar & header ──────────────────────────────────
+function renderSidebar() {
+  document.getElementById("team-list").innerHTML = '<div class="section-label">Teamleden</div>' +
+    AK.map(k => `<div class="team-member" id="m-${k}" onclick="openAvatarConfig()">
+      <span class="status-dot ${connected?'status-online':'status-offline'}" id="d-${k}"></span>
+      ${sidebarAvatar(k)}<span>${AGENTS[k].name}</span>
+    </div>`).join("");
+}
+
+function renderHeader() {
+  document.getElementById("header-avatars").innerHTML =
+    AK.slice(0,5).map(k => headerAvatar(k,28)).join("") +
+    `<div style="width:28px;height:28px;border-radius:6px;background:#E8E8E8;display:flex;align-items:center;justify-content:center;font-size:11px;color:#8B8FA3;font-weight:700">+1</div>`;
+}
+
+// ── Init ─────────────────────────────────────────────────────
+(function init() {
+  loadSettings();
+  renderSidebar();
+  renderHeader();
+  document.getElementById("chat-input").addEventListener("input", function() {
+    this.style.height = "auto";
+    this.style.height = Math.min(this.scrollHeight, 120) + "px";
+  });
+  // Auto-connect if URL saved
+  if (document.getElementById("webhook-url").value.trim()) connect();
+})();
+
+// ── Connection ───────────────────────────────────────────────
+function toggleConnection() { connected ? disconnect() : connect(); }
+
+function connect() {
+  const url = document.getElementById("webhook-url").value.trim();
+  if (!url) { alert("Vul een webhook URL in"); return; }
+  localStorage.setItem("hrt_webhook_url", url);
+  sessionId = "s_" + Math.random().toString(36).substr(2,12);
+  connected = true;
+  updateConnUI();
+  const w = document.getElementById("welcome"); if (w) w.style.display = "none";
+  addAgentMsg("wendai", "Hallo, ik ben WendAI, je persoonlijke HR assistent. Met welke HR uitdaging kan ik je helpen?");
+}
+
+function disconnect() { connected = false; sessionId = null; updateConnUI(); }
+
+function updateConnUI() {
+  const btn = document.getElementById("connect-btn");
+  const st = document.getElementById("conn-status");
+  const inp = document.getElementById("chat-input");
+  const sb = document.getElementById("send-btn");
+  if (connected) {
+    btn.textContent = "Verbreken"; btn.className = "connect-btn btn-connected";
+    st.className = "conn-badge conn-on"; st.innerHTML = "● Verbonden";
+    inp.disabled = false; sb.disabled = false; inp.placeholder = "Stuur een bericht naar #hr-advies..."; inp.focus();
+  } else {
+    btn.textContent = "Verbinden"; btn.className = "connect-btn btn-ready";
+    st.className = "conn-badge conn-off"; st.innerHTML = "● Niet verbonden";
+    inp.disabled = true; sb.disabled = true; inp.placeholder = "Verbind eerst met n8n...";
+  }
+  AK.forEach(k => {
+    const d = document.getElementById(`d-${k}`);
+    if (d) d.className = `status-dot ${connected?'status-online':'status-offline'}`;
+  });
+}
+
+// ── Send message ─────────────────────────────────────────────
+function handleKey(e) { if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+
+async function sendMessage() {
+  const inp = document.getElementById("chat-input");
+  const text = inp.value.trim();
+  if (!text || !connected || sending) return;
+  sending = true; inp.value = ""; inp.style.height = "auto";
+  document.getElementById("send-btn").disabled = true;
+
+  addUserMsg(text);
+  showTyping("wendai");
+
+  try {
+    const url = document.getElementById("webhook-url").value.trim();
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "sendMessage", chatInput: text, sessionId }),
+    });
+    removeTyping();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("text/event-stream") || ct.includes("text/plain")) {
+      await handleStream(res);
+    } else {
+      const data = await res.json();
+      const out = data.output || data.response || data.text ||
+        (Array.isArray(data) ? data[0]?.output || data[0]?.response || JSON.stringify(data) : JSON.stringify(data));
+      parseResponse(out);
+    }
+  } catch (err) {
+    removeTyping();
+    addSysMsg(`Verbindingsfout: ${err.message}`);
+  }
+  sending = false;
+  document.getElementById("send-btn").disabled = false;
+  document.getElementById("chat-input").focus();
+}
+
+async function handleStream(res) {
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = "", full = "";
+  showTyping("wendai");
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split("\n"); buf = lines.pop() || "";
+    for (const ln of lines) {
+      if (ln.startsWith("data: ")) {
+        const d = ln.slice(6);
+        if (d === "[DONE]") continue;
+        try { const p = JSON.parse(d); full += p.token||p.text||p.chunk||""; } catch { full += d; }
+      } else if (ln.trim() && !ln.startsWith(":")) full += ln;
+    }
+  }
+  removeTyping();
+  if (full.trim()) parseResponse(full.trim());
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RESPONSE PARSING
+// ═══════════════════════════════════════════════════════════════
+const ANNOUNCE = [
+  { k:"sophie",   r:/(?:ik\s+ga|ik\s+schakel|laat\s+me|ik\s+roep|ik\s+vraag).*(?:wetenschapper|sophie)/i },
+  { k:"daan",     r:/(?:ik\s+ga|ik\s+schakel|laat\s+me|ik\s+roep|ik\s+vraag).*(?:data\s*verzamelaar|daan)/i },
+  { k:"marielle", r:/(?:ik\s+ga|ik\s+schakel|laat\s+me|ik\s+roep|ik\s+vraag).*(?:hr[- ]?adviseur|mari[eë]lle)/i },
+  { k:"henk",     r:/(?:ik\s+ga|ik\s+schakel|laat\s+me|ik\s+roep|ik\s+vraag).*(?:jurist|henk)/i },
+  { k:"lisa",     r:/(?:ik\s+ga|ik\s+schakel|laat\s+me|ik\s+roep|ik\s+vraag).*(?:tekstschrijver|lisa)/i },
+];
+
+const OUTPUT = [
+  { k:"sophie",   r:/(?:de\s+)?(?:wetenschapper|sophie)\s+heeft\s+(?:het\s+volgende\s+)?(?:gevonden|opgeleverd|aangeleverd|gedeeld)/i },
+  { k:"daan",     r:/(?:de\s+)?(?:data\s*verzamelaar|daan)\s+heeft\s+(?:het\s+volgende\s+)?(?:gevonden|opgeleverd|verzameld|aangeleverd|gedeeld)/i },
+  { k:"marielle", r:/(?:de\s+)?(?:hr[- ]?adviseur|mari[eë]lle)\s+heeft\s+(?:het\s+volgende\s+)?(?:geadviseerd|opgeleverd|gevonden|gedeeld)/i },
+  { k:"henk",     r:/(?:de\s+)?(?:jurist|henk)\s+heeft\s+(?:het\s+volgende\s+)?(?:geadviseerd|opgeleverd|gevonden|getoetst|gedeeld)/i },
+  { k:"lisa",     r:/(?:de\s+)?(?:tekstschrijver|lisa)\s+heeft\s+(?:het\s+volgende\s+)?(?:opgeleverd|geschreven|gemaakt|gedeeld)/i },
+];
+
+const REQUEST = [
+  { k:"sophie",   r:/(?:aan|naar)\s+(?:de\s+)?(?:wetenschapper|sophie)\s+(?:gevraagd|gestuurd|doorgegeven|meegegeven)/i },
+  { k:"daan",     r:/(?:aan|naar)\s+(?:de\s+)?(?:data\s*verzamelaar|daan)\s+(?:gevraagd|gestuurd|doorgegeven|meegegeven)/i },
+  { k:"marielle", r:/(?:aan|naar)\s+(?:de\s+)?(?:hr[- ]?adviseur|mari[eë]lle)\s+(?:gevraagd|gestuurd|doorgegeven|meegegeven)/i },
+  { k:"henk",     r:/(?:aan|naar)\s+(?:de\s+)?(?:jurist|henk)\s+(?:gevraagd|gestuurd|doorgegeven|meegegeven)/i },
+  { k:"lisa",     r:/(?:aan|naar)\s+(?:de\s+)?(?:tekstschrijver|lisa)\s+(?:gevraagd|gestuurd|doorgegeven|meegegeven)/i },
+];
+
+function parseResponse(text) {
+  const paras = text.split(/\n{2,}/);
+  let sections = [], curAgent = null, curBuf = [];
+
+  function flush() {
+    if (curAgent && curBuf.length) {
+      sections.push({ t:"agent", agent:curAgent, text:curBuf.join("\n\n").trim() });
+      curBuf = []; curAgent = null;
+    }
+  }
+
+  for (const p of paras) {
+    const s = p.trim(); if (!s) continue;
+
+    // Announcement?
+    let matched = false;
+    for (const a of ANNOUNCE) {
+      if (a.r.test(s)) { flush(); sections.push({ t:"announce", agent:a.k, text:s }); matched = true; break; }
+    }
+    if (matched) continue;
+
+    // Agent output start?
+    for (const o of OUTPUT) {
+      if (o.r.test(s)) { flush(); curAgent = o.k; curBuf.push(s); matched = true; break; }
+    }
+    if (matched) continue;
+
+    // Request to agent?
+    for (const r of REQUEST) {
+      if (r.r.test(s)) { flush(); sections.push({ t:"request", agent:r.k, text:s }); matched = true; break; }
+    }
+    if (matched) continue;
+
+    // Continuation of current agent or WendAI
+    if (curAgent) { curBuf.push(s); }
+    else { sections.push({ t:"wendai", text:s }); }
+  }
+  flush();
+
+  if (!sections.length) sections = [{ t:"wendai", text:text.trim() }];
+
+  // Render with delays for visual effect
+  let delay = 0;
+  for (const sec of sections) {
+    setTimeout(() => {
+      switch (sec.t) {
+        case "announce":
+          addMentionMsg("wendai", sec.agent, sec.text);
+          showTyping(sec.agent);
+          setTimeout(() => removeTyping(), 2000);
+          break;
+        case "request":
+          addInternalMsg("wendai", sec.agent, sec.text);
+          break;
+        case "agent":
+          addAgentCard(sec.agent, sec.text);
+          break;
+        default:
+          addAgentMsg("wendai", sec.text);
+      }
+    }, delay);
+    delay += sec.t === "announce" ? 800 : sec.t === "agent" ? 600 : 300;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DOM RENDERING
+// ═══════════════════════════════════════════════════════════════
+function timeNow() { return new Date().toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"}); }
+function fmt(t) {
+  t = t.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
+  t = t.replace(/^[•\-]\s+/gm,"• ");
+  t = t.replace(/^(#{1,3})\s+(.+)$/gm,(_,h,x)=>`<strong style="font-size:${h.length===1?15:14}px">${x}</strong>`);
+  return t;
+}
+function scroll() { const m=document.getElementById("messages-area"); requestAnimationFrame(()=>{m.scrollTop=m.scrollHeight}); }
+function esc(t) { const d=document.createElement("div"); d.textContent=t; return d.innerHTML; }
+function escR(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+const MA = () => document.getElementById("messages-area");
+
+function addUserMsg(text) {
+  MA().insertAdjacentHTML("beforeend", `<div class="msg-row msg-appear">
+    <div class="avatar-chat-fb" style="background:linear-gradient(135deg,#475569,#64748B)">JIJ</div>
+    <div style="flex:1"><div style="display:flex;align-items:baseline;gap:8px">
+      <span class="msg-name" style="color:#1D1E25">Jij</span><span class="msg-time">${timeNow()}</span>
+    </div><div class="msg-text">${esc(text)}</div></div>
+  </div>`); scroll();
+}
+
+function addAgentMsg(k, text) {
+  const a=AGENTS[k];
+  MA().insertAdjacentHTML("beforeend", `<div class="msg-row msg-appear">
+    ${chatAvatar(k)}
+    <div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px">
+      <span class="msg-name" style="color:${a.color}">${a.name}</span><span class="msg-time">${timeNow()}</span>
+    </div><div class="msg-text">${fmt(esc(text))}</div></div>
+  </div>`); scroll();
+}
+
+function addAgentCard(k, text) {
+  const a=AGENTS[k];
+  MA().insertAdjacentHTML("beforeend", `<div class="msg-row msg-appear">
+    ${chatAvatar(k)}
+    <div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px">
+      <span class="msg-name" style="color:${a.color}">${a.name}</span><span class="msg-time">${timeNow()}</span>
+    </div><div class="card">
+      <div class="card-header" style="background:${a.gradient}">${cardAvatar(k)} ${a.icon} ${a.name} — ${a.role}</div>
+      <div class="card-body">${fmt(esc(text))}</div>
+    </div></div>
+  </div>`); scroll();
+}
+
+function addMentionMsg(from, to, text) {
+  const f=AGENTS[from], t=AGENTS[to];
+  const hl = fmt(esc(text)).replace(
+    new RegExp(`(${escR(t.name)}|${escR(t.role)}|wetenschapper|data\\s*verzamelaar|hr[- ]?adviseur|jurist|tekstschrijver|sophie|daan|mari[eë]lle|henk|lisa)`,"gi"),
+    `<span style="background:${t.color}18;color:${t.color};font-weight:600;padding:1px 4px;border-radius:4px">$1</span>`
+  );
+  MA().insertAdjacentHTML("beforeend", `<div class="msg-row msg-appear">
+    ${chatAvatar(from)}
+    <div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px">
+      <span class="msg-name" style="color:${f.color}">${f.name}</span><span class="msg-time">${timeNow()}</span>
+    </div><div class="msg-text">${hl}</div></div>
+  </div>`); scroll();
+}
+
+function addInternalMsg(from, to, text) {
+  const f=AGENTS[from], t=AGENTS[to];
+  MA().insertAdjacentHTML("beforeend", `<div class="msg-row msg-appear" style="opacity:0.85">
+    ${chatAvatar(from)}
+    <div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px">
+      <span class="msg-name" style="color:${f.color}">${f.name}</span>
+      <span style="font-size:11px;color:#8B8FA3">→</span>
+      <span class="msg-name" style="color:${t.color}">${t.name}</span>
+      <span class="msg-time">${timeNow()}</span>
+    </div><div class="internal-msg">
+      <div class="internal-label">Interne communicatie</div>
+      ${fmt(esc(text))}
+    </div></div>
+  </div>`); scroll();
+}
+
+function addSysMsg(text) {
+  MA().insertAdjacentHTML("beforeend", `<div class="msg-appear" style="text-align:center;padding:8px 20px">
+    <span style="background:#FFF3E0;color:#E65100;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:600">${esc(text)}</span>
+  </div>`); scroll();
+}
+
+function showTyping(k) {
+  removeTyping(); const a=AGENTS[k];
+  MA().insertAdjacentHTML("beforeend", `<div class="msg-row" id="typing" data-agent="${k}">
+    ${chatAvatar(k)}<div>
+      <span class="msg-name" style="color:${a.color}">${a.name}</span>
+      <div style="color:#8B8FA3;font-size:13px;margin-top:2px;display:flex;gap:3px;align-items:center">
+        <span class="typing-dot" style="animation-delay:0s">●</span>
+        <span class="typing-dot" style="animation-delay:0.15s">●</span>
+        <span class="typing-dot" style="animation-delay:0.3s">●</span>
+        <span style="margin-left:4px;font-style:italic">is aan het typen...</span>
+      </div>
+    </div>
+  </div>`);
+  const d=document.getElementById(`d-${k}`); if(d)d.className="status-dot status-away";
+  scroll();
+}
+
+function removeTyping() {
+  const el=document.getElementById("typing");
+  if(el) {
+    const k=el.dataset.agent;
+    if(k&&connected){const d=document.getElementById(`d-${k}`);if(d)d.className="status-dot status-online";}
+    el.remove();
+  }
+}
+</script>
+</body>
+</html>
