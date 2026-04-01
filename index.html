@@ -30,18 +30,18 @@
   .channel-active{padding:5px 10px;border-radius:6px;background:#1164A3;color:#fff;font-weight:600;font-size:14px}
   .channel-inactive{padding:5px 10px;color:#8B8FA3;font-size:14px;margin-top:2px}
 
-  .team-member{display:flex;align-items:center;gap:8px;padding:5px 10px;font-size:14px;color:#D1D2D3;border-radius:6px;cursor:default;position:relative}
+  .team-member{display:flex;align-items:center;gap:10px;padding:6px 10px;font-size:14px;color:#D1D2D3;border-radius:6px;cursor:default;position:relative}
   .team-member:hover{background:#2C2D31}
-  .member-avatar-wrap{position:relative;width:28px;height:28px;flex-shrink:0}
-  .member-avatar{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:10px;background-size:cover;background-position:center;overflow:hidden;position:relative}
-  .member-avatar img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:6px}
-  .avatar-upload-btn{position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#C9A063;border:1.5px solid #1A1D21;display:none;align-items:center;justify-content:center;font-size:8px;color:#fff;cursor:pointer;line-height:1}
+  .member-avatar-wrap{position:relative;width:36px;height:36px;flex-shrink:0}
+  .member-avatar{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;background-size:cover;background-position:center;overflow:hidden;position:relative}
+  .member-avatar img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:8px}
+  .avatar-upload-btn{position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:#C9A063;border:1.5px solid #1A1D21;display:none;align-items:center;justify-content:center;font-size:9px;color:#fff;cursor:pointer;line-height:1}
   .team-member:hover .avatar-upload-btn{display:flex}
-  .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;position:absolute;bottom:-1px;right:-1px;border:1.5px solid #1A1D21}
+  .status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;position:absolute;bottom:-1px;right:-1px;border:2px solid #1A1D21}
   .status-online{background:#44b700}.status-away{background:#f5a623}.status-offline{background:#666}
   .member-info{flex:1;min-width:0}
-  .member-name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .member-role{font-size:10px;color:#5A5A6A}
+  .member-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .member-role{font-size:11px;color:#5A5A6A}
 
   .config-panel{margin-top:auto;padding:12px 16px;border-top:1px solid #35373B}
   .config-label{font-size:11px;color:#8B8FA3;margin-bottom:4px;font-weight:700;letter-spacing:.03em}
@@ -74,12 +74,18 @@
   .send-btn:disabled{background:#E8E8E8;color:#999;cursor:not-allowed;filter:none}
 
   /* Messages */
-  .msg-row{display:flex;gap:10px;padding:6px 20px;align-items:flex-start}
-  .chat-avatar{width:36px;height:36px;min-width:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;letter-spacing:-.02em;background-size:cover;background-position:center;overflow:hidden;position:relative;flex-shrink:0}
-  .chat-avatar img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:6px}
-  .msg-name{font-weight:700;font-size:14px}
+  .msg-row{display:flex;gap:12px;padding:6px 20px;align-items:flex-start;max-width:85%}
+  .msg-row-agent{justify-content:flex-start}
+  .msg-row-user{margin-left:auto;flex-direction:row-reverse}
+  .chat-avatar{width:44px;height:44px;min-width:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;letter-spacing:-.02em;background-size:cover;background-position:center;overflow:hidden;position:relative;flex-shrink:0}
+  .chat-avatar img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:10px}
+  .msg-name{font-weight:700;font-size:15px}
   .msg-time{font-size:11px;color:#8B8FA3}
-  .msg-text{font-size:14px;line-height:1.6;color:#1D1E25;margin-top:3px;white-space:pre-wrap}
+  .msg-bubble{padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.6;margin-top:4px;white-space:pre-wrap}
+  .msg-bubble-agent{background:#F0F2F5;color:#1D1E25;border-top-left-radius:4px}
+  .msg-bubble-user{background:#C9A063;color:#fff;border-top-right-radius:4px}
+  .msg-bubble-user a{color:#fff}
+  .msg-bubble-directed{background:#F0F2F5;color:#1D1E25;border-top-left-radius:4px;border-left:3px solid}
 
   .card{margin-top:8px;border:1px solid #E0E3EB;border-radius:8px;overflow:hidden;background:#fff}
   .card-header{padding:10px 14px;color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px}
@@ -186,8 +192,8 @@ function buildTeamList(){
 function buildHeaderAvatars(){
   document.getElementById("header-avatars").innerHTML=
     AK.slice(0,5).map(k=>{const a=AGENTS[k],ph=getPhoto(k);
-      return`<div class="chat-avatar" id="ha-${k}" style="background:${a.gradient};width:28px;height:28px;min-width:28px;font-size:10px">${ph?`<img src="${ph}" onerror="this.remove()">`:a.initials}</div>`}).join("")+
-    `<div class="chat-avatar" style="background:#E8E8E8;color:#8B8FA3;font-size:11px;font-weight:700;width:28px;height:28px;min-width:28px">+1</div>`;
+      return`<div class="chat-avatar" id="ha-${k}" style="background:${a.gradient};width:34px;height:34px;min-width:34px;font-size:12px">${ph?`<img src="${ph}" onerror="this.remove()">`:a.initials}</div>`}).join("")+
+    `<div class="chat-avatar" style="background:#E8E8E8;color:#8B8FA3;font-size:12px;font-weight:700;width:34px;height:34px;min-width:34px">+1</div>`;
 }
 
 // ═══ AVATARS ═══
@@ -404,19 +410,19 @@ function fmt(t){
 
 function addUser(text){
   document.getElementById("messages-area").insertAdjacentHTML("beforeend",
-    `<div class="msg-row msg-appear"><div class="chat-avatar" style="background:linear-gradient(135deg,#475569,#64748B)">JIJ</div><div style="flex:1"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:#1D1E25">Jij</span><span class="msg-time">${timeNow()}</span></div><div class="msg-text">${esc(text)}</div></div></div>`);scroll();
+    `<div class="msg-row msg-row-user msg-appear"><div class="chat-avatar" style="background:linear-gradient(135deg,#475569,#64748B)">JIJ</div><div><div style="display:flex;align-items:baseline;gap:8px;justify-content:flex-end"><span class="msg-time">${timeNow()}</span><span class="msg-name" style="color:#1D1E25">Jij</span></div><div class="msg-bubble msg-bubble-user">${esc(text)}</div></div></div>`);scroll();
 }
 
 function addMsg(k,text){
   const a=AGENTS[k];
   document.getElementById("messages-area").insertAdjacentHTML("beforeend",
-    `<div class="msg-row msg-appear">${avHTML(k)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:${a.color}">${a.name}</span><span style="font-size:11px;color:#8B8FA3;font-weight:500">${a.role}</span><span class="msg-time">${timeNow()}</span></div><div class="msg-text">${fmt(esc(text))}</div></div></div>`);scroll();
+    `<div class="msg-row msg-row-agent msg-appear">${avHTML(k)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:${a.color}">${a.name}</span><span style="font-size:12px;color:#8B8FA3;font-weight:500">${a.role}</span><span class="msg-time">${timeNow()}</span></div><div class="msg-bubble msg-bubble-agent">${fmt(esc(text))}</div></div></div>`);scroll();
 }
 
 function addCard(k,text){
   const a=AGENTS[k];
   document.getElementById("messages-area").insertAdjacentHTML("beforeend",
-    `<div class="msg-row msg-appear">${avHTML(k)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:${a.color}">${a.name}</span><span style="font-size:11px;color:#8B8FA3;font-weight:500">${a.role}</span><span class="msg-time">${timeNow()}</span></div><div class="card"><div class="card-header" style="background:${a.gradient}">${a.icon} ${a.name} — ${a.role}</div><div class="card-body">${fmt(esc(text))}</div></div></div></div>`);scroll();
+    `<div class="msg-row msg-row-agent msg-appear">${avHTML(k)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:${a.color}">${a.name}</span><span style="font-size:12px;color:#8B8FA3;font-weight:500">${a.role}</span><span class="msg-time">${timeNow()}</span></div><div class="card"><div class="card-header" style="background:${a.gradient}">${a.icon} ${a.name} — ${a.role}</div><div class="card-body">${fmt(esc(text))}</div></div></div></div>`);scroll();
 }
 
 function addMention(from,to,text){
@@ -424,7 +430,7 @@ function addMention(from,to,text){
   const hl=esc(text).replace(new RegExp(`(${escRe(t.name)}|${escRe(t.role)}|wetenschapper|data\\s*verzamelaar|hr[- ]?adviseur|jurist|tekstschrijver|sophie|daan|mari[eë]lle|ali|lisa)`,"gi"),
     `<span style="background:${t.color}18;color:${t.color};font-weight:600;padding:1px 4px;border-radius:4px">$1</span>`);
   document.getElementById("messages-area").insertAdjacentHTML("beforeend",
-    `<div class="msg-row msg-appear">${avHTML(from)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:${f.color}">${f.name}</span><span style="font-size:11px;color:#8B8FA3;font-weight:500">${f.role}</span><span class="msg-time">${timeNow()}</span></div><div class="msg-text">${fmt(hl)}</div></div></div>`);scroll();
+    `<div class="msg-row msg-row-agent msg-appear">${avHTML(from)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:${f.color}">${f.name}</span><span style="font-size:12px;color:#8B8FA3;font-weight:500">${f.role}</span><span class="msg-time">${timeNow()}</span></div><div class="msg-bubble msg-bubble-agent">${fmt(hl)}</div></div></div>`);scroll();
 }
 
 function addDirectedMsg(from,to,text){
@@ -435,13 +441,13 @@ function addDirectedMsg(from,to,text){
       return `<span style="background:${t.color}18;color:${t.color};font-weight:600;padding:1px 4px;border-radius:4px">${match}</span>`;
     });
   document.getElementById("messages-area").insertAdjacentHTML("beforeend",
-    `<div class="msg-row msg-appear">${avHTML(from)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span class="msg-name" style="color:${f.color}">${f.name}</span><span style="font-size:11px;color:#8B8FA3">→</span><span style="font-size:12px;font-weight:600;color:${t.color}">${t.name}</span><span class="msg-time">${timeNow()}</span></div><div class="msg-text" style="border-left:3px solid ${t.color}30;padding-left:10px;margin-top:4px">${fmt(hl)}</div></div></div>`);scroll();
+    `<div class="msg-row msg-row-agent msg-appear">${avHTML(from)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span class="msg-name" style="color:${f.color}">${f.name}</span><span style="font-size:12px;color:#8B8FA3">→</span><span style="font-size:13px;font-weight:600;color:${t.color}">${t.name}</span><span class="msg-time">${timeNow()}</span></div><div class="msg-bubble msg-bubble-directed" style="border-left-color:${t.color}">${fmt(hl)}</div></div></div>`);scroll();
 }
 
 function addAgentReply(k,text){
   const a=AGENTS[k];
   document.getElementById("messages-area").insertAdjacentHTML("beforeend",
-    `<div class="msg-row msg-appear">${avHTML(k)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:${a.color}">${a.name}</span><span style="font-size:11px;color:#8B8FA3;font-weight:500">${a.role}</span><span class="msg-time">${timeNow()}</span></div><div class="card"><div class="card-header" style="background:${a.gradient}">${a.icon} ${a.name} — ${a.role}</div><div class="card-body">${fmt(esc(text))}</div></div></div></div>`);scroll();
+    `<div class="msg-row msg-row-agent msg-appear">${avHTML(k)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><span class="msg-name" style="color:${a.color}">${a.name}</span><span style="font-size:12px;color:#8B8FA3;font-weight:500">${a.role}</span><span class="msg-time">${timeNow()}</span></div><div class="card"><div class="card-header" style="background:${a.gradient}">${a.icon} ${a.name} — ${a.role}</div><div class="card-body">${fmt(esc(text))}</div></div></div></div>`);scroll();
 }
 
 function addHandoff(from,to){
@@ -459,7 +465,7 @@ function addSystem(text){
 function showTyping(k){
   removeTyping();const a=AGENTS[k];setSt(k,"away");
   document.getElementById("messages-area").insertAdjacentHTML("beforeend",
-    `<div class="msg-row" id="typing-ind" data-agent="${k}">${avHTML(k)}<div><span class="msg-name" style="color:${a.color}">${a.name}</span><div style="color:#8B8FA3;font-size:13px;margin-top:2px;display:flex;gap:3px;align-items:center"><span class="typing-dot" style="animation-delay:0s">●</span><span class="typing-dot" style="animation-delay:.15s">●</span><span class="typing-dot" style="animation-delay:.3s">●</span><span style="margin-left:4px;font-style:italic">is aan het typen...</span></div></div></div>`);scroll();
+    `<div class="msg-row msg-row-agent" id="typing-ind" data-agent="${k}">${avHTML(k)}<div><span class="msg-name" style="color:${a.color}">${a.name}</span><div style="color:#8B8FA3;font-size:13px;margin-top:4px;display:flex;gap:3px;align-items:center"><span class="typing-dot" style="animation-delay:0s">●</span><span class="typing-dot" style="animation-delay:.15s">●</span><span class="typing-dot" style="animation-delay:.3s">●</span><span style="margin-left:4px;font-style:italic">is aan het typen...</span></div></div></div>`);scroll();
 }
 function removeTyping(){const el=document.getElementById("typing-ind");if(el){const k=el.getAttribute("data-agent");if(k&&connected)setSt(k,"online");el.remove()}}
 </script>
