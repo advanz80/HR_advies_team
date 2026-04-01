@@ -158,7 +158,7 @@ const AGENTS={
   sophie:  {name:"Dr. Sophie Vermeer", role:"Wetenschapper",   color:"#5B6ABF",initials:"SV",gradient:"linear-gradient(135deg,#5B6ABF,#7B8AD4)",icon:"🔬"},
   daan:    {name:"Daan de Groot",       role:"Data Verzamelaar",color:"#2EAA6F",initials:"DG",gradient:"linear-gradient(135deg,#2EAA6F,#4DC98A)",icon:"📊"},
   marielle:{name:"Mariëlle Bakker",     role:"HR Adviseur",     color:"#D4566A",initials:"MB",gradient:"linear-gradient(135deg,#D4566A,#E87A8D)",icon:"💼"},
-  henk:    {name:"Mr. Henk Jansen",     role:"Jurist",          color:"#3A3A5C",initials:"HJ",gradient:"linear-gradient(135deg,#3A3A5C,#5A5A7C)",icon:"⚖️"},
+  ali:    {name:"Mr. Ali Mhmid",     role:"Jurist",          color:"#3A3A5C",initials:"HJ",gradient:"linear-gradient(135deg,#3A3A5C,#5A5A7C)",icon:"⚖️"},
   lisa:    {name:"Lisa van Dijk",        role:"Tekstschrijver",  color:"#B35CC9",initials:"LD",gradient:"linear-gradient(135deg,#B35CC9,#D07CE0)",icon:"✍️"},
 };
 const AK=Object.keys(AGENTS);
@@ -351,7 +351,7 @@ function detectMention(text){
     {agent:"sophie",  re:/(?:schakel|roep|vraag|ga).*?(?:wetenschapper|sophie)/i},
     {agent:"daan",    re:/(?:schakel|roep|vraag|ga).*?(?:data\s*verzamelaar|daan)/i},
     {agent:"marielle",re:/(?:schakel|roep|vraag|ga).*?(?:hr[- ]?adviseur|mari[eë]lle)/i},
-    {agent:"henk",    re:/(?:schakel|roep|vraag|ga).*?(?:jurist|henk)/i},
+    {agent:"ali",    re:/(?:schakel|roep|vraag|ga).*?(?:jurist|ali)/i},
     {agent:"lisa",    re:/(?:schakel|roep|vraag|ga).*?(?:tekstschrijver|lisa)/i},
   ];
   for(const p of patterns){if(p.re.test(text))return p.agent}
@@ -363,7 +363,7 @@ const OUTPUT_RE=[
   {agent:"sophie",  re:/(?:de\s+)?wetenschapper\s+heeft\s+/i},{agent:"sophie",  re:/(?:de\s+)?wetenschapper\s*:/i},
   {agent:"daan",    re:/(?:de\s+)?data\s*verzamelaar\s+heeft\s+/i},{agent:"daan",    re:/(?:de\s+)?data\s*verzamelaar\s*:/i},
   {agent:"marielle",re:/(?:de\s+)?(?:hr[- ]?)?adviseur\s+heeft\s+/i},{agent:"marielle",re:/(?:de\s+)?(?:hr[- ]?)?adviseur\s*:/i},
-  {agent:"henk",    re:/(?:de\s+)?jurist\s+heeft\s+/i},{agent:"henk",    re:/(?:de\s+)?jurist\s*:/i},
+  {agent:"ali",    re:/(?:de\s+)?jurist\s+heeft\s+/i},{agent:"henk",    re:/(?:de\s+)?jurist\s*:/i},
   {agent:"lisa",    re:/(?:de\s+)?tekstschrijver\s+heeft\s+/i},{agent:"lisa",    re:/(?:de\s+)?tekstschrijver\s*:/i},
 ];
 const REGISSEUR_RE=[/dit betekent/i,/voor jouw situatie/i,/heb je (?:hier\s+)?vragen/i,/wil je dat ik/i,/ik ga nu/i,/ik schakel/i,/als volgende stap/i,/samengevat/i];
