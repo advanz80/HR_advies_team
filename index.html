@@ -410,7 +410,7 @@ function fmt(t){
 
 function addUser(text){
   document.getElementById("messages-area").insertAdjacentHTML("beforeend",
-    `<div class="msg-row msg-row-user msg-appear"><div class="chat-avatar" style="background:linear-gradient(135deg,#475569,#64748B)">JIJ</div><div><div style="display:flex;align-items:baseline;gap:8px;justify-content:flex-end"><span class="msg-time">${timeNow()}</span><span class="msg-name" style="color:#1D1E25">Jij</span></div><div class="msg-bubble msg-bubble-user">${esc(text)}</div></div></div>`);scroll();
+    `<div class="msg-appear" style="display:flex;justify-content:flex-end;padding:6px 20px"><div style="max-width:75%"><div style="text-align:right"><span class="msg-time">${timeNow()}</span></div><div class="msg-bubble msg-bubble-user">${esc(text)}</div></div></div>`);scroll();
 }
 
 function addMsg(k,text){
