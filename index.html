@@ -178,8 +178,16 @@ let connected=false,sessionId=null,sending=false,avatarPhotos={},uploadingFor=nu
   buildTeamList();buildHeaderAvatars();
   const ta=document.getElementById("chat-input");
   ta.addEventListener("input",()=>{ta.style.height="auto";ta.style.height=Math.min(ta.scrollHeight,120)+"px"});
-  const u=localStorage.getItem("n8n_webhook_url");
-  if(u){document.getElementById("webhook-url").value=u;setTimeout(()=>connect(),300)}
+  // URL priority: ?url= parameter > localStorage
+  const params=new URLSearchParams(window.location.search);
+  const paramUrl=params.get("url");
+  const savedUrl=localStorage.getItem("n8n_webhook_url");
+  const webhookUrl=paramUrl||savedUrl;
+  if(webhookUrl){
+    document.getElementById("webhook-url").value=webhookUrl;
+    if(paramUrl)localStorage.setItem("n8n_webhook_url",paramUrl);
+    setTimeout(()=>connect(),300);
+  }
 })();
 
 function getPhoto(k){return avatarPhotos[k]||AGENTS[k]?.photo||null}
@@ -233,7 +241,7 @@ function connect(){
   sessionId="s_"+Math.random().toString(36).substr(2,10);
   connected=true;updateUI();
   const w=document.getElementById("welcome");if(w)w.style.display="none";
-  addMsg("wendai","Hallo, ik ben WendAI, de regisseur van je HR-advies team. Met welke uitdaging kunnen wij je helpen?");
+  addMsg("wendai","Hallo, ik ben WendAI, de regisseur van je HR-advies team. Met welke HR uitdaging kan ik je helpen?");
 }
 function disconnect(){connected=false;sessionId=null;updateUI()}
 function updateUI(){
