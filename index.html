@@ -106,12 +106,41 @@
 
   .hidden-upload{display:none}
 
-  @media(max-width:700px){.sidebar{display:none}}
+  /* Mobile hamburger button — hidden on desktop */
+  .mobile-menu-btn{display:none;background:none;border:none;color:#1D1E25;font-size:22px;cursor:pointer;padding:4px 8px;line-height:1}
+  .sidebar-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:998}
+
+  @media(max-width:700px){
+    .sidebar{position:fixed;top:0;left:-280px;height:100vh;z-index:999;transition:left .25s ease;box-shadow:none}
+    .sidebar.open{left:0;box-shadow:4px 0 20px rgba(0,0,0,.3)}
+    .sidebar-overlay.open{display:block}
+    .mobile-menu-btn{display:block}
+    .app{flex-direction:column}
+    .main-chat{height:100vh}
+    .chat-header{padding:8px 14px}
+    .chat-title{font-size:15px}
+    .header-avatars{gap:2px}
+    .header-avatars .chat-avatar{width:28px!important;height:28px!important;min-width:28px!important;font-size:10px!important;border-radius:6px!important}
+    .messages-area{padding:10px 0}
+    .msg-row{padding:4px 12px;max-width:92%}
+    .chat-avatar{width:36px;height:36px;min-width:36px;font-size:12px;border-radius:8px}
+    .chat-avatar img{border-radius:8px}
+    .msg-name{font-size:13px}
+    .msg-bubble{font-size:13px;padding:8px 12px;border-radius:10px}
+    .card-body{font-size:12px;padding:10px}
+    .card-header{font-size:12px;padding:8px 10px}
+    .input-area{padding:8px 12px 10px}
+    .chat-input{font-size:16px;padding:8px 12px;min-height:38px}
+    .send-btn{padding:8px 14px;font-size:13px}
+    .handoff{padding:4px 12px}
+    .welcome-title{font-size:18px}
+    .welcome-text{font-size:13px;padding:0 20px}
+  }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
     <div class="ws-header">
       <div class="ws-icon">D</div>
       <div><div class="ws-name">Driessen Groep</div><div class="ws-sub">HR Advies Team</div></div>
@@ -132,11 +161,15 @@
       <button class="connect-btn connect-btn-ready" id="connect-btn" onclick="toggleConnection()">Verbinden</button>
     </div>
   </div>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
   <div class="main-chat">
     <div class="chat-header">
-      <div>
-        <div class="chat-title"># hr-advies</div>
-        <div class="chat-subtitle"><span id="conn-status" class="conn-badge conn-badge-off">● Niet verbonden</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+        <div>
+          <div class="chat-title"># hr-advies</div>
+          <div class="chat-subtitle"><span id="conn-status" class="conn-badge conn-badge-off">● Niet verbonden</span></div>
+        </div>
       </div>
       <div class="header-avatars" id="header-avatars"></div>
     </div>
@@ -192,6 +225,16 @@ let connected=false,sessionId=null,sending=false,avatarPhotos={},uploadingFor=nu
 
 function getPhoto(k){return avatarPhotos[k]||AGENTS[k]?.photo||null}
 
+// ═══ MOBILE SIDEBAR ═══
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("sidebar-overlay").classList.toggle("open");
+}
+function closeSidebar(){
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("sidebar-overlay").classList.remove("open");
+}
+
 function buildTeamList(){
   document.getElementById("team-list").innerHTML='<div class="section-label">Teamleden</div>'+
     AK.map(k=>{const a=AGENTS[k],ph=getPhoto(k);
@@ -241,7 +284,7 @@ function connect(){
   sessionId="s_"+Math.random().toString(36).substr(2,10);
   connected=true;updateUI();
   const w=document.getElementById("welcome");if(w)w.style.display="none";
-  addMsg("wendai","Hallo, ik ben WendAI, de regisseur van je HR-advies team. Met welke HR uitdaging kan ik je helpen?");
+  addMsg("wendai","Welkom, ik ben WendAI, de regisseur van je HR-advies team. Met welk HR-vraagstuk kan ik je helpen?");
 }
 function disconnect(){connected=false;sessionId=null;updateUI()}
 function updateUI(){
