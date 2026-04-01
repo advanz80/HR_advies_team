@@ -319,7 +319,7 @@ async function displayJSONMessages(messages){
     if(!text.trim()) continue;
 
     // Typing delay scales with text length — longer feels more natural
-    const typingDelay = Math.min(1500 + text.length * 5, 5000);
+    const typingDelay = Math.min(1500 + text.length * 5, 8000);
 
     // Show handoff when agent changes
     if(prevAgent && agentKey !== prevAgent){
