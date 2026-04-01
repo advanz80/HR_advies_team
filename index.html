@@ -233,7 +233,7 @@ function connect(){
   sessionId="s_"+Math.random().toString(36).substr(2,10);
   connected=true;updateUI();
   const w=document.getElementById("welcome");if(w)w.style.display="none";
-  addMsg("wendai","Hallo, ik ben WendAI, je persoonlijke HR assistent. Met welke HR uitdaging kan ik je helpen?");
+  addMsg("wendai","Hallo, ik ben WendAI, de regisseur van je HR-advies team. Met welke uitdaging kunnen wij je helpen?");
 }
 function disconnect(){connected=false;sessionId=null;updateUI()}
 function updateUI(){
