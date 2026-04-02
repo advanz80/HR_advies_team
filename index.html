@@ -304,8 +304,11 @@ async function sendMessage(){
   addUser(text);showTyping("wendai");
   try{
     const url=document.getElementById("webhook-url").value.trim();
-    const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({action:"sendMessage",chatInput:text,sessionId})});
+   const controller=new AbortController();
+   const timeout=setTimeout(()=>controller.abort(),120000);
+   const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({action:"sendMessage",chatInput:text,sessionId}),signal:controller.signal});
+clearTimeout(timeout);;
     removeTyping();
     if(!res.ok)throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     const ct=res.headers.get("content-type")||"";
